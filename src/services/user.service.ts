@@ -2,7 +2,7 @@ import client from "../config/database";
 
 interface UserProps{
     username: string,
-    hashedPassword: string,
+    password: string,
     email: string,
     name:string,
     lastName: string
@@ -37,7 +37,7 @@ export const postUser = async (user: UserProps) => {
         // Values to be inserted into the database
         const values = [
             user.username,
-            user.hashedPassword,
+            user.password,
             user.email,
             user.name,
             user.lastName

@@ -34,6 +34,10 @@ export const postUserController = async (req: Request, res: Response): Promise<v
         if (username.length < 6 || username.length > 20) {
             throw new Error("Username must be between 6 and 20 characters");
         }
+
+        const lowerCaseName = name.toLowerCase();
+        const lowerCaseLastName = lastName.toLowerCase();
+
         if (!EmailValidator.validate(email)) {
             throw new Error("Invalid email address");
         }
@@ -58,7 +62,7 @@ export const postUserController = async (req: Request, res: Response): Promise<v
         const hashedPassword = await argon2.hash(password);
 
         
-        const newUser = await postUser({ username, hashedPassword, email, name, lastName });
+        const newUser = await postUser({ username, password: hashedPassword, email, name: lowerCaseName, lastName: lowerCaseLastName });
 
         if (typeof newUser === "string") {
             throw new Error("postUser returned a string instead of an object");
