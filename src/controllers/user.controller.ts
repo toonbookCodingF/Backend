@@ -63,8 +63,7 @@ export const loginController = async (req: Request, res: Response) => {
     const isPasswordValid = await argon2.verify(user.password, password);
     if (!isPasswordValid) {
         // Log email, provided password, and stored hashed password for debugging
-        console.log("Debug Info:", { email, providedPassword: password, storedHashedPassword: user.password });
-        handleResponse(res, 401, `Invalid password: ${email}, ${password}, ${user.password}`);
+        handleResponse(res, 401, "Invalid password");
         return;
     }
 
@@ -82,4 +81,14 @@ export const loginController = async (req: Request, res: Response) => {
     handleResponse(res, 200, "Login successful", user);
 }
 
+export const logoutController = async (req: Request, res: Response) => {
+    // Clear the token cookie
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+        sameSite: 'strict'
+    });
 
+    // Send a response indicating the user has been logged out
+    handleResponse(res, 200, "Logout successful");
+};
