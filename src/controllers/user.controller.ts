@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getAllUsers, getUser, postUser } from "../services/user.service";
+import argon2 from "argon2";
 
 interface ApiResponse<T> {
     status: number;
@@ -56,9 +57,10 @@ export const loginController = async (req: Request, res: Response) => {
     }
 
     // Vérification du mot de passe
-
-    if (password !== user.password) {
-        handleResponse(res, 401, "Invalid password");
+    const filledPassword = await argon2.hash(password);
+    if (filledPassword !== user.password) {
+        console.log("Debug Info:", { email, filledPassword, userPassword: user.password });
+        handleResponse(res, 401, `Invalid password : ${email}, ${filledPassword}, ${user.password}`);
         return;
     }
 
