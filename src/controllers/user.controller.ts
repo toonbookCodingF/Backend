@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getAllUsers, postUser } from "../services/user.service";
+import { getAllUsers, getUser, postUser } from "../services/user.service";
 
 interface ApiResponse<T> {
     status: number;
@@ -37,4 +37,33 @@ export const postUserController = async (req: Request, res: Response): Promise<v
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+export const loginController = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    // Vérification des champs
+    if (!email || !password) {
+        handleResponse(res, 400, "Email and password are required");
+        return;
+    }
+
+    // Vérification de l'utilisateur
+    const user = await getUser(email);
+
+    if (!user) {
+        handleResponse(res, 404, "User not found");
+        return;
+    }
+
+    // Vérification du mot de passe
+
+    if (password !== user.password) {
+        handleResponse(res, 401, "Invalid password");
+        return;
+    }
+
+    // Envoi de la réponse
+    handleResponse(res, 200, "Login successful", user);
+}
+
 
