@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { getAllUsers, getUser, postUser } from "../services/user.service";
 import argon2 from "argon2";
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET, JWT_EXPIRATION } from '../index';
+
 
 interface ApiResponse<T> {
     status: number;
@@ -57,12 +60,23 @@ export const loginController = async (req: Request, res: Response) => {
     }
 
     // Vérification du mot de passe
-    const filledPassword = await argon2.hash(password);
-    if (filledPassword !== user.password) {
-        console.log("Debug Info:", { email, filledPassword, userPassword: user.password });
-        handleResponse(res, 401, `Invalid password : ${email}, ${filledPassword}, ${user.password}`);
+    const isPasswordValid = await argon2.verify(user.password, password);
+    if (!isPasswordValid) {
+        // Log email, provided password, and stored hashed password for debugging
+        console.log("Debug Info:", { email, providedPassword: password, storedHashedPassword: user.password });
+        handleResponse(res, 401, `Invalid password: ${email}, ${password}, ${user.password}`);
         return;
     }
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
+
+    // Set token as a cookie
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+        maxAge: 90 * 24 * 60 * 60 * 1000 // 90 days in milliseconds
+    });
 
     // Envoi de la réponse
     handleResponse(res, 200, "Login successful", user);
