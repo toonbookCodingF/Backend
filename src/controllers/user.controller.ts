@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
+import * as EmailValidator from 'email-validator';
+import * as argon2 from "argon2";
 import { getAllUsers, getUser, postUser } from "../services/user.service";
-import argon2 from "argon2";
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET, JWT_EXPIRATION } from '../index';
-
 
 interface ApiResponse<T> {
     status: number;
@@ -29,16 +29,58 @@ export const postUserController = async (req: Request, res: Response): Promise<v
     const { username, password, email, name, lastName } = req.body;
 
     try {
-        const newUser = await postUser({ username, password, email, name, lastName });
+        const dangerousChars = /[<>\/\\'";]/;
+        if (dangerousChars.test(username) || dangerousChars.test(name) || dangerousChars.test(lastName)) {
+            throw new Error("Contains invalid characters");
+        }
+        if (username.length < 6 || username.length > 20) {
+            throw new Error("Username must be between 6 and 20 characters");
+        }
+
+        const lowerCaseName = name.toLowerCase();
+        const lowerCaseLastName = lastName.toLowerCase();
+
+        if (!EmailValidator.validate(email)) {
+            throw new Error("Invalid email address");
+        }
+        if (dangerousChars.test(password)) {
+            throw new Error("Password contains invalid characters");
+        }
+        if (password.length < 12) {
+            throw new Error("Password must be at least 12 characters");
+        }
+        
+        // Check if password contains at least one lowercase letter, one uppercase letter, one number, and one special character (excluding dangerous characters)
+        const lowercase = /[a-z]/;
+        const uppercase = /[A-Z]/;
+        const number = /[0-9]/;
+        const safeSpecialChar = /[!@#$%^&*(),.?":{}|]/;
+
+        if (!lowercase.test(password) || !uppercase.test(password) || !number.test(password) || !safeSpecialChar.test(password)) {
+            throw new Error("Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character (excluding dangerous characters)");
+        }
+
+        // Hash the password
+        const hashedPassword = await argon2.hash(password);
+
+        
+        const newUser = await postUser({ username, password: hashedPassword, email, name: lowerCaseName, lastName: lowerCaseLastName });
 
         if (typeof newUser === "string") {
             throw new Error("postUser returned a string instead of an object");
         }
 
+
+
         res.status(201).json({ message: "User created successfully", data: newUser });
     } catch (err) {
-        console.error("Error creating user:", err);
-        res.status(500).json({ message: "Internal Server Error" });
+        if (err instanceof Error) {
+            console.error("Error creating user:", err.message);
+            res.status(400).json({ message: err.message });
+        } else {
+            console.error("Unknown error creating user");
+            res.status(400).json({ message: "Unknown error" });
+        }
     }
 };
 
