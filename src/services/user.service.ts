@@ -13,6 +13,19 @@ export const getAllUsers = async () => {
     return result.rows;
 };
 
+export const getUser = async (email: string) => {
+    const query = `SELECT * FROM "User" WHERE email = $1;`;
+    const values = [email];
+
+    try {
+        const result = await client.query(query, values);
+        return result.rows[0]; // ✅ Retourne l'objet utilisateur
+    } catch (error) {
+        console.error("Error getting user:", error);
+        throw new Error("Database error");
+    }
+}
+
 export const postUser = async (user: UserProps) => {
     // Query to check if the email already exists
     const checkEmailQuery = `
