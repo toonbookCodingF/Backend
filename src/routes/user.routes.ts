@@ -1,11 +1,14 @@
 import { Router } from "express";
 import { getUsersController, loginController, logoutController, postUserController } from "../controllers";
+import { authenticateToken } from "../middlewares/authMiddleware";
 
-const router = Router(); 
+const router = Router();
 
-router.get("/getAll", getUsersController);
-router.post("/postUser", postUserController);
-router.post("/login", loginController);
-router.post("/logout", logoutController);
+router.get("/getAll", authenticateToken, getUsersController); // Public
+router.post("/postUser", postUserController); // Public
+router.get("/login", loginController); // Public
+
+// Routes protégées
+router.post("/logout", authenticateToken, logoutController);
 
 export default router;
