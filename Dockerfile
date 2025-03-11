@@ -4,20 +4,20 @@ FROM node:18-alpine
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier package.json et package-lock.json
+# Copier package.json et package-lock.json dans le conteneur
 COPY package*.json ./
 
-# Installer les dépendances
+# Installer les dépendances du projet (y compris typescript pour la compilation)
 RUN npm install
 
-# Copier le reste du code
+# Copier tout le code source dans le conteneur
 COPY . .
 
-# Construire le projet TypeScript
+# Exécuter la commande de build TypeScript pour compiler le code
 RUN npm run build
 
-# Exposer le port
+# Exposer le port 3000
 EXPOSE 3000
 
-# Démarrer l'application
-CMD ["node", "dist/index.js"]
+# Démarrer l'application avec Node.js (le code compilé)
+CMD ["npm", "start"]

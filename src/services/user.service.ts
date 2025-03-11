@@ -1,6 +1,6 @@
 import client from "../config/database";
 
-interface UserProps{
+export interface UserProps{
     username: string,
     password: string,
     email: string,
@@ -14,7 +14,7 @@ export const getAllUsers = async () => {
 };
 
 export const getUser = async (email: string) => {
-    const query = `SELECT * FROM "User" WHERE email = $1;`;
+    const query = `SELECT * FROM \"User\" WHERE email = $1;`;
     const values = [email];
 
     try {
@@ -29,7 +29,7 @@ export const getUser = async (email: string) => {
 export const postUser = async (user: UserProps) => {
     // Query to check if the email already exists
     const checkEmailQuery = `
-        SELECT * FROM "User" WHERE email = $1;
+        SELECT * FROM \"User\" WHERE email = $1;
     `;
 
     try {
@@ -40,7 +40,7 @@ export const postUser = async (user: UserProps) => {
 
         // SQL query to insert a new user into the "User" table
         const query = `
-            INSERT INTO "User" 
+            INSERT INTO \"User\"
             (username, password, email, "createdAt", role, name, "lastName") 
             VALUES 
             ($1, $2, $3, NOW(), 'free', $4, $5)
