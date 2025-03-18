@@ -84,44 +84,36 @@ export const postUserController = async (req: Request, res: Response): Promise<v
     }
 };
 
-export const loginController = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+export const loginController = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email, password } = req.body;
 
-    // Vérification des champs
-    if (!email || !password) {
-        handleResponse(res, 400, "Email and password are required");
-        return;
+        if (!email || !password) {
+            res.status(400).json({ message: 'Email et mot de passe requis' });
+            return;
+        }
+
+        const user = await getUser(email);
+        if (!user) {
+            res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+            return;
+        }
+
+        const validPassword = await argon2.verify(user.password, password);
+        if (!validPassword) {
+            res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+            return;
+        }
+
+        const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '24h' });
+        res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+
+        res.json({ message: 'Connexion réussie', user: { id: user.id, email: user.email } });
+    } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
     }
-
-    // Vérification de l'utilisateur
-    const user = await getUser(email);
-
-    if (!user) {
-        handleResponse(res, 404, "User not found");
-        return;
-    }
-
-    // Vérification du mot de passe
-    const isPasswordValid = await argon2.verify(user.password, password);
-    if (!isPasswordValid) {
-        // Log email, provided password, and stored hashed password for debugging
-        handleResponse(res, 401, "Invalid password");
-        return;
-    }
-
-    // Generate JWT token
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
-
-    // Set token as a cookie
-    res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-        maxAge: 90 * 24 * 60 * 60 * 1000 // 90 days in milliseconds
-    });
-
-    // Envoi de la réponse
-    handleResponse(res, 200, "Login successful", user);
-}
+};
 
 export const logoutController = async (req: Request, res: Response) => {
     // Clear the token cookie
