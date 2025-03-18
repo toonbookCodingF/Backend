@@ -9,6 +9,6 @@ router.post("/postUser", postUserController); // Public
 router.get("/login", loginController); // Public
 
 // Routes protégées
-router.post("/logout", authenticateToken, logoutController);
+router.get("/logout", authenticateToken, logoutController);
 
 export default router;

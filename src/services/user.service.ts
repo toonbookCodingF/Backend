@@ -1,13 +1,16 @@
 import client from "../config/database";
 
-export interface UserProps{
-    username: string,
-    password: string,
-    email: string,
-    name:string,
-    lastName: string
-
+export interface UserProps {
+    id?: number;
+    username: string;
+    password: string;
+    email: string;
+    name: string;
+    lastName: string;
+    role?: string;
+    createdAt?: Date;
 }
+
 export const getAllUsers = async () => {
     const result = await client.query("SELECT * FROM \"User\"");
     return result.rows;
