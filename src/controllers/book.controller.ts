@@ -26,10 +26,11 @@ export const getBookController = async (req: Request, res: Response): Promise<vo
 
 export const createBookController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, description, cover, user_id, status, category_id, bookType_id } = req.body;
+    const { title, description, user_id, status, category_id, bookType_id } = req.body;
+    const coverFile = req.file;
 
     // Validation des champs requis
-    if (!title || !description || !cover || !user_id || !status || !category_id || !bookType_id) {
+    if (!title || !description || !user_id || !status || !category_id || !bookType_id) {
       res.status(400).json({ message: 'All fields are required' });
       return;
     }
@@ -37,12 +38,12 @@ export const createBookController = async (req: Request, res: Response): Promise
     const newBook = await createBook({
       title,
       description,
-      cover,
+      cover: '',
       user_id,
       status,
       category_id,
       bookType_id
-    });
+    }, coverFile);
 
     res.status(201).json({ message: 'Book created successfully', data: newBook });
   } catch (error) {
@@ -69,25 +70,25 @@ export const deleteBookController = async (req: Request, res: Response): Promise
 };
 
 export const updateBookController = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const id = parseInt(req.params.id);
-        const { title, description, cover, status, category_id, bookType_id } = req.body;
+  try {
+    const id = parseInt(req.params.id);
+    const { title, description, status, category_id, bookType_id } = req.body;
+    const coverFile = req.file;
 
-        const updatedBook = await updateBook(id, {
-            title,
-            description,
-            cover,
-            status,
-            category_id,
-            bookType_id
-        });
+    const updatedBook = await updateBook(id, {
+      title,
+      description,
+      status,
+      category_id,
+      bookType_id
+    }, coverFile);
 
-        res.json({ message: 'Livre mis à jour avec succès', data: updatedBook });
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ message: error.message });
-        } else {
-            res.status(400).json({ message: 'Erreur inconnue' });
-        }
+    res.json({ message: 'Book updated successfully', data: updatedBook });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ message: error.message });
+    } else {
+      res.status(400).json({ message: 'Unknown error' });
     }
+  }
 }; 

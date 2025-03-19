@@ -3,13 +3,7 @@ import * as EmailValidator from 'email-validator';
 import * as argon2 from "argon2";
 import { getAllUsers, getUser, postUser } from "../services/user.service";
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET, JWT_EXPIRATION } from '../index';
-
-interface ApiResponse<T> {
-    status: number;
-    message: string;
-    data?: T | null;
-}
+import { JWT_SECRET } from '../config/jwt.config';
 
 // Ajout des types pour éviter l'erreur "any"
 const handleResponse = <T>(res: Response, status: number, message: string, data: T | null = null) => {
@@ -106,7 +100,12 @@ export const loginController = async (req: Request, res: Response): Promise<void
         }
 
         const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '24h' });
-        res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+        res.cookie('token', token, { 
+            httpOnly: true, 
+            maxAge: 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
+        });
 
         res.json({ message: 'Connexion réussie', user: { id: user.id, email: user.email } });
     } catch (error) {
