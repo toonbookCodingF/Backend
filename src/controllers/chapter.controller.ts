@@ -36,25 +36,54 @@ export const getChaptersByBookController = async (req: Request, res: Response): 
 
 export const createChapterController = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { book_id, status, title } = req.body;
+        const { book_id, title, status, order } = req.body;
 
-        if (!book_id || !status || !title) {
-            res.status(400).json({ message: 'All fields are required' });
+        // Validation des champs requis
+        if (!book_id || !title || !status || order === undefined) {
+            res.status(400).json({ 
+                message: 'Missing required fields',
+                required: ['book_id', 'title', 'status', 'order']
+            });
+            return;
+        }
+
+        // Validation des types
+        if (typeof book_id !== 'number' || typeof order !== 'number') {
+            res.status(400).json({ 
+                message: 'Invalid field types',
+                errors: {
+                    book_id: 'Must be a number',
+                    order: 'Must be a number'
+                }
+            });
+            return;
+        }
+
+        if (typeof title !== 'string' || typeof status !== 'string') {
+            res.status(400).json({ 
+                message: 'Invalid field types',
+                errors: {
+                    title: 'Must be a string',
+                    status: 'Must be a string'
+                }
+            });
             return;
         }
 
         const newChapter = await createChapter({
             book_id,
+            title,
             status,
-            title
+            order
         });
 
         res.status(201).json({ message: 'Chapter created successfully', data: newChapter });
     } catch (error) {
+        console.error('Error in createChapterController:', error);
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });
         } else {
-            res.status(400).json({ message: 'Unknown error' });
+            res.status(500).json({ message: 'Internal server error' });
         }
     }
 };
@@ -62,12 +91,12 @@ export const createChapterController = async (req: Request, res: Response): Prom
 export const updateChapterController = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = parseInt(req.params.id);
-        const { book_id, status, title } = req.body;
+        const { title, status, order } = req.body;
 
         const updatedChapter = await updateChapter(id, {
-            book_id,
+            title,
             status,
-            title
+            order
         });
 
         res.json({ message: 'Chapter updated successfully', data: updatedChapter });

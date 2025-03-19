@@ -14,13 +14,15 @@ export const getBookContentController = async (req: Request, res: Response): Pro
     try {
         const id = parseInt(req.params.id);
         const content = await getBookContent(id);
+        
         if (!content) {
-            res.status(404).json({ message: 'Book content not found' });
+            res.status(404).json({ message: 'Content not found' });
             return;
         }
+
         res.json(content);
     } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' });
+        res.status(500).json({ message: 'Something went wrong' });
     }
 };
 
@@ -36,20 +38,44 @@ export const getBookContentsByChapterController = async (req: Request, res: Resp
 
 export const createBookContentController = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { chapter_id, content, type } = req.body;
+        const { chapter_id, content, order, type } = req.body;
+        const imageFile = req.file;
 
-        if (!chapter_id || !content) {
-            res.status(400).json({ message: 'Chapter ID and content are required' });
+        if (!chapter_id || !order) {
+            res.status(400).json({ message: 'Chapter ID and order are required' });
+            return;
+        }
+
+        if (!type) {
+            res.status(400).json({ message: 'Type is required' });
+            return;
+        }
+
+        if (type !== 'text' && type !== 'image') {
+            res.status(400).json({ message: 'Type must be either "text" or "image"' });
+            return;
+        }
+
+        // Si c'est une image, le content n'est pas requis car il sera remplacé par le chemin de l'image
+        if (type === 'image' && !imageFile) {
+            res.status(400).json({ message: 'Image file is required when type is "image"' });
+            return;
+        }
+
+        // Si c'est du texte, le content est requis
+        if (type === 'text' && !content) {
+            res.status(400).json({ message: 'Content is required when type is "text"' });
             return;
         }
 
         const newContent = await createBookContent({
             chapter_id,
-            content,
+            content: content || '', // Si c'est une image, le content sera remplacé par le chemin
+            order,
             type
-        });
+        }, imageFile);
 
-        res.status(201).json({ message: 'Book content created successfully', data: newContent });
+        res.status(201).json({ message: 'Content created successfully', data: newContent });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });
@@ -62,15 +88,17 @@ export const createBookContentController = async (req: Request, res: Response): 
 export const updateBookContentController = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = parseInt(req.params.id);
-        const { chapter_id, content, type } = req.body;
+        const { content, order, type } = req.body;
+        const imageFile = req.file;
 
         const updatedContent = await updateBookContent(id, {
-            chapter_id,
             content,
-            type
+            order,
+            type,
+            imageFile
         });
 
-        res.json({ message: 'Book content updated successfully', data: updatedContent });
+        res.json({ message: 'Content updated successfully', data: updatedContent });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });
@@ -84,7 +112,7 @@ export const deleteBookContentController = async (req: Request, res: Response): 
     try {
         const id = parseInt(req.params.id);
         await deleteBookContent(id);
-        res.json({ message: 'Book content deleted successfully' });
+        res.json({ message: 'Content deleted successfully' });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });

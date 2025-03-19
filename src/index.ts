@@ -1,21 +1,35 @@
-import dotenv from "dotenv";
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+import bookRoutes from './routes/book.routes';
+import chapterRoutes from './routes/chapter.routes';
+import bookContentRoutes from './routes/bookContent.routes';
+import userRoutes from './routes/user.routes';
+import path from 'path';
+
 dotenv.config();
-import express from "express";
-import router from "./routes";
-import "./config/database"; // Assure l'initialisation de PostgreSQL
-import cookieParser from "cookie-parser";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-// 🔥 Assure-toi que ces constantes sont bien exportées
-export const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
-export const JWT_EXPIRATION = "90d";
-
+// Middleware
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/api", router);
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+// Servir les fichiers statiques depuis le dossier public
+app.use('/public', express.static(path.join(__dirname, '../public')));
+
+// Routes
+app.use('/api/books', bookRoutes);
+app.use('/api/chapters', chapterRoutes);
+app.use('/api/book-content', bookContentRoutes);
+app.use('/api/users', userRoutes);
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
