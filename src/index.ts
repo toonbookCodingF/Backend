@@ -19,11 +19,18 @@ const allowedOrigins = [
     'http://localhost:19006',          // Expo web
     'http://localhost:8081',           // Android emulator
     'http://localhost:19000',          // iOS simulator
-    process.env.FRONTEND_URL || '',    // URL de production web
+    'http://localhost:19002',          // Expo dev server
+    'http://localhost:19003',          // Expo dev server
+    'http://localhost:19004',          // Expo dev server
+    'http://localhost:19005',          // Expo dev server
+    'http://localhost:19006',          // Expo dev server
     'exp://localhost:19000',           // Expo development
+    'exp://localhost:8081',            // Android development
+    'exp://localhost:19000',           // iOS development
     'exp://192.168.1.1:19000',        // Expo LAN
     'exp://192.168.1.1:8081',         // Android LAN
     'exp://192.168.1.1:19000',        // iOS LAN
+    process.env.FRONTEND_URL || '',    // URL de production web
 ];
 
 // Middleware
@@ -39,8 +46,10 @@ app.use(cors({
         return callback(null, true);
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    maxAge: 600 // 10 minutes
 }));
 
 app.use(express.json());
