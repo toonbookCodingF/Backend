@@ -11,8 +11,6 @@ interface AuthenticatedRequest extends Request {
 // Middleware pour vérifier le token JWT
 export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-       
-
         // Vérifier d'abord le header Authorization
         const authHeader = req.headers['authorization'];
         
@@ -23,18 +21,35 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
             token = req.cookies.token;
         }
 
-        if (!token) {
-            res.status(401).json({ message: 'Token manquant' });
-            return;
+        // Si toujours pas de token, vérifier le query parameter (pour les appels API directs)
+        if (!token && req.query.token) {
+            token = req.query.token as string;
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
-        
-        req.user = { id: decoded.id } as UserProps;
-        next();
+        if (!token) {
+            return res.status(401).json({ 
+                message: 'Token manquant',
+                error: 'AUTH_NO_TOKEN'
+            });
+        }
+
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+            req.user = { id: decoded.id } as UserProps;
+            next();
+        } catch (jwtError) {
+            console.error('Erreur de vérification du token:', jwtError);
+            return res.status(401).json({ 
+                message: 'Token invalide ou expiré',
+                error: 'AUTH_INVALID_TOKEN'
+            });
+        }
     } catch (error) {
         console.error('=== Erreur d\'authentification ===');
         console.error('Erreur complète:', error);
-        res.status(401).json({ message: 'Token invalide' });
+        return res.status(500).json({ 
+            message: 'Erreur serveur lors de l\'authentification',
+            error: 'AUTH_SERVER_ERROR'
+        });
     }
 };
