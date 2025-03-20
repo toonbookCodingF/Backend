@@ -15,10 +15,11 @@ const port = process.env.PORT || 3000;
 
 // Middleware CORS simplifié
 app.use(cors({
-    origin: '*', // Autorise toutes les origines
+    origin: true, // Autorise toutes les origines
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    credentials: true,
     maxAge: 600 // 10 minutes
 }));
 
