@@ -3,13 +3,8 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/jwt.config";
 import { UserProps } from "../services/user.service"; // Importation de UserProps
 
-// Interface Authentifiée qui étend Request avec un utilisateur
-interface AuthenticatedRequest extends Request {
-    user?: UserProps; // L'utilisateur sera de type UserProps après vérification du token
-}
-
 // Middleware pour vérifier le token JWT
-export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         // Vérifier d'abord le header Authorization
         const authHeader = req.headers['authorization'];
@@ -27,10 +22,11 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
         }
 
         if (!token) {
-            return res.status(401).json({ 
+            res.status(401).json({ 
                 message: 'Token manquant',
                 error: 'AUTH_NO_TOKEN'
             });
+            return;
         }
 
         try {
@@ -39,7 +35,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
             next();
         } catch (jwtError) {
             console.error('Erreur de vérification du token:', jwtError);
-            return res.status(401).json({ 
+            res.status(401).json({ 
                 message: 'Token invalide ou expiré',
                 error: 'AUTH_INVALID_TOKEN'
             });
@@ -47,7 +43,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     } catch (error) {
         console.error('=== Erreur d\'authentification ===');
         console.error('Erreur complète:', error);
-        return res.status(500).json({ 
+        res.status(500).json({ 
             message: 'Erreur serveur lors de l\'authentification',
             error: 'AUTH_SERVER_ERROR'
         });
