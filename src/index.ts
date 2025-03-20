@@ -13,44 +13,21 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configuration des origines autorisées
-const allowedOrigins = [
-    'http://localhost:3000',           // Frontend web local
-    'http://localhost:19006',          // Expo web
-    'http://localhost:8081',           // Android emulator
-    'http://localhost:19000',          // iOS simulator
-    'http://localhost:19002',          // Expo dev server
-    'http://localhost:19003',          // Expo dev server
-    'http://localhost:19004',          // Expo dev server
-    'http://localhost:19005',          // Expo dev server
-    'http://localhost:19006',          // Expo dev server
-    'exp://localhost:19000',           // Expo development
-    'exp://localhost:8081',            // Android development
-    'exp://localhost:19000',           // iOS development
-    'exp://192.168.1.1:19000',        // Expo LAN
-    'exp://192.168.1.1:8081',         // Android LAN
-    'exp://192.168.1.1:19000',        // iOS LAN
-    process.env.FRONTEND_URL || '',    // URL de production web
-];
-
-// Middleware
+// Middleware CORS simplifié
 app.use(cors({
-    origin: function(origin, callback) {
-        // Permettre les requêtes sans origine (comme les appels API directs)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'La politique CORS pour ce site ne permet pas l\'accès depuis l\'origine spécifiée.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
-    credentials: true,
+    origin: '*', // Autorise toutes les origines
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
     maxAge: 600 // 10 minutes
 }));
+
+// Middleware pour logger les requêtes (utile pour le débogage)
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
