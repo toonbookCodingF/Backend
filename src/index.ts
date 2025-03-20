@@ -6,6 +6,9 @@ import bookRoutes from './routes/book.routes';
 import chapterRoutes from './routes/chapter.routes';
 import bookContentRoutes from './routes/bookContent.routes';
 import userRoutes from './routes/user.routes';
+import categoryRoutes from './routes/category.routes';
+import bookCategoryRoutes from './routes/bookCategory.routes';
+import bookTypeRoutes from './routes/bookType.routes';
 import path from 'path';
 
 dotenv.config();
@@ -41,6 +44,9 @@ app.use('/api/books', bookRoutes);
 app.use('/api/chapters', chapterRoutes);
 app.use('/api/book-content', bookContentRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/book-categories', bookCategoryRoutes);
+app.use('/api/book-types', bookTypeRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

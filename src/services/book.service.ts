@@ -1,26 +1,33 @@
-import db from '../config/database';
+import client from '../config/database';
 import { BookProps } from '../types/book.types';
 import fs from 'fs';
 import path from 'path';
 
 export const getAllBooks = async () => {
-    try {
-        const result = await db.query('SELECT * FROM "Book"');
-        return result.rows;
-    } catch (error) {
-        console.error('Error in getAllBooks:', error);
-        throw error;
-    }
+    const query = 'SELECT * FROM "Book" ORDER BY title';
+    const result = await client.query(query);
+    return result.rows;
 };
 
 export const getBook = async (id: number) => {
-    try {
-        const result = await db.query('SELECT * FROM "Book" WHERE id = $1', [id]);
-        return result.rows[0];
-    } catch (error) {
-        console.error('Error in getBook:', error);
-        throw error;
-    }
+    const query = 'SELECT * FROM "Book" WHERE id = $1';
+    const result = await client.query(query, [id]);
+    return result.rows[0];
+};
+
+export const getCategoriesByBook = async (bookId: number) => {
+    const query = `
+        SELECT 
+            c.id,
+            c.name,
+            c.description
+        FROM "Category" c
+        JOIN "Book_Category" bc ON c.id = bc.category_id
+        WHERE bc.book_id = $1
+        ORDER BY c.name
+    `;
+    const result = await client.query(query, [bookId]);
+    return result.rows;
 };
 
 export const createBook = async (book: BookProps, coverFile?: Express.Multer.File) => {
@@ -41,7 +48,7 @@ export const createBook = async (book: BookProps, coverFile?: Express.Multer.Fil
             coverPath = `/images/covers/${fileName}`;
         }
 
-        const result = await db.query(
+        const result = await client.query(
             `INSERT INTO "Book" (title, description, cover, status, category_id, "bookType_id", user_id) 
              VALUES ($1, $2, $3, $4, $5, $6, $7) 
              RETURNING *`,
@@ -81,7 +88,7 @@ export const updateBook = async (id: number, book: Partial<BookProps>, coverFile
             }
         }
 
-        const result = await db.query(
+        const result = await client.query(
             `UPDATE "Book" 
              SET title = COALESCE($1, title),
                  description = COALESCE($2, description),
@@ -112,8 +119,8 @@ export const deleteBook = async (id: number) => {
         }
 
         // Supprimer le livre et tous ses chapitres associés
-        await db.query('DELETE FROM "Chapter" WHERE book_id = $1', [id]);
-        const result = await db.query('DELETE FROM "Book" WHERE id = $1 RETURNING *', [id]);
+        await client.query('DELETE FROM "Chapter" WHERE book_id = $1', [id]);
+        const result = await client.query('DELETE FROM "Book" WHERE id = $1 RETURNING *', [id]);
         return result.rows[0];
     } catch (error) {
         console.error('Error in deleteBook:', error);
