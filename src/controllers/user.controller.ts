@@ -129,7 +129,11 @@ export const loginController = async (req: Request, res: Response, next: NextFun
             sameSite: 'lax'
         });
 
-        handleResponse(res, 200, "Connexion réussie", { id: user.id, email: user.email });
+        handleResponse(res, 200, "Connexion réussie", { 
+            id: user.id, 
+            email: user.email,
+            token: token 
+        });
     } catch (error) {
         console.error('Erreur lors de la connexion:', error);
         handleResponse(res, 500, "Erreur serveur");
