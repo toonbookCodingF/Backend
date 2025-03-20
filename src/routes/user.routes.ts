@@ -6,7 +6,7 @@ const router = Router();
 
 router.get("/getAll", authenticateToken, getUsersController); // Public
 router.post("/postUser", createUserController); // Public
-router.get("/login", loginController); // Public
+router.post("/login", loginController); // Public
 
 // Routes protégées
 router.get("/logout", authenticateToken, logoutController);
