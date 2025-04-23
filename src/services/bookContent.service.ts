@@ -8,17 +8,16 @@ export interface BookContentProps {
     content: string;
     type: 'text' | 'image';
     order: number;
-    createdAt?: Date;
     imageFile?: Express.Multer.File;
 }
 
 export const getAllBookContents = async () => {
-    const result = await client.query("SELECT * FROM \"BookContent\"");
+    const result = await client.query("SELECT * FROM \"bookcontent\"");
     return result.rows;
 };
 
 export const getBookContent = async (id: number) => {
-    const query = `SELECT * FROM \"BookContent\" WHERE id = $1;`;
+    const query = `SELECT * FROM \"bookcontent\" WHERE id = $1;`;
     const values = [id];
 
     try {
@@ -30,7 +29,7 @@ export const getBookContent = async (id: number) => {
 };
 
 export const getBookContentsByChapter = async (chapterId: number) => {
-    const query = `SELECT * FROM \"BookContent\" WHERE chapter_id = $1 ORDER BY "order";`;
+    const query = `SELECT * FROM \"bookcontent\" WHERE chapter_id = $1 ORDER BY "order";`;
     const values = [chapterId];
 
     try {
@@ -44,11 +43,11 @@ export const getBookContentsByChapter = async (chapterId: number) => {
 export const createBookContent = async (bookContent: BookContentProps, imageFile?: Express.Multer.File) => {
     try {
         // Vérifier si le chapitre existe
-        const checkChapterQuery = `SELECT * FROM \"Chapter\" WHERE id = $1;`;
+        const checkChapterQuery = `SELECT * FROM \"chapter\" WHERE id = $1;`;
         const checkChapterResult = await client.query(checkChapterQuery, [bookContent.chapter_id]);
         
         if (checkChapterResult.rows.length === 0) {
-            throw new Error("Chapter not found");
+            throw new Error("chapter not found");
         }
 
         let content = bookContent.content || '';
@@ -67,8 +66,8 @@ export const createBookContent = async (bookContent: BookContentProps, imageFile
         }
 
         const query = `
-            INSERT INTO \"BookContent\"
-            (chapter_id, content, type, "createdAt", "order")
+            INSERT INTO \"bookcontent\"
+            (chapter_id, content, type, "createdat", "order")
             VALUES 
             ($1, $2, $3, NOW(), $4)
             RETURNING *;
@@ -95,7 +94,7 @@ export const createBookContent = async (bookContent: BookContentProps, imageFile
 export const updateBookContent = async (id: number, bookContent: Partial<BookContentProps>) => {
     try {
         // Récupérer l'ancien contenu pour vérifier s'il y a une image à supprimer
-        const oldContentQuery = `SELECT * FROM "BookContent" WHERE id = $1;`;
+        const oldContentQuery = `SELECT * FROM "bookcontent" WHERE id = $1;`;
         const oldContentResult = await client.query(oldContentQuery, [id]);
         
         if (oldContentResult.rows.length === 0) {
@@ -125,7 +124,7 @@ export const updateBookContent = async (id: number, bookContent: Partial<BookCon
         }
 
         const query = `
-            UPDATE "BookContent"
+            UPDATE "bookcontent"
             SET 
                 chapter_id = COALESCE($1, chapter_id),
                 content = COALESCE($2, content),
@@ -165,12 +164,12 @@ export const deleteBookContent = async (id: number) => {
             }
         }
 
-        const query = `DELETE FROM \"BookContent\" WHERE id = $1 RETURNING *;`;
+        const query = `DELETE FROM \"bookcontent\" WHERE id = $1 RETURNING *;`;
         const values = [id];
 
         const result = await client.query(query, values);
         if (result.rows.length === 0) {
-            throw new Error("Book content not found");
+            throw new Error("book content not found");
         }
         return result.rows[0];
     } catch (error) {

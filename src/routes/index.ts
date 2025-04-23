@@ -6,6 +6,7 @@ import bookContentRoutes from "./bookContent.routes";
 import categoryRoutes from "./category.routes";
 import bookCategoryRoutes from "./bookCategory.routes";
 import bookTypeRoutes from "./bookType.routes";
+import commentRoutes from "./comment.routes";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/book-contents", bookContentRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/book-categories", bookCategoryRoutes);
 router.use("/book-types", bookTypeRoutes);
+router.use("/comments", commentRoutes);
 
 export default router;

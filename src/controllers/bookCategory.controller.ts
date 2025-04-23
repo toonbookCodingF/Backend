@@ -38,7 +38,7 @@ export const getAllBookCategoriesController = async (req: Request, res: Response
     try {
         console.log('Getting all book categories...');
         const bookCategories = await getAllBookCategories();
-        console.log('Book categories retrieved:', bookCategories);
+        console.log('book categories retrieved:', bookCategories);
         handleResponse(res, 200, "Relations livre-catégorie récupérées avec succès", bookCategories);
     } catch (error) {
         console.error('Error in getAllBookCategoriesController:', error);
@@ -136,7 +136,7 @@ export const deleteBookCategoryController = async (req: Request, res: Response):
         console.log('Deleting book category with bookId:', bookId, 'and categoryId:', categoryId);
         
         const deletedBookCategory = await deleteBookCategory(parseInt(bookId), parseInt(categoryId));
-        console.log('Book category deleted:', deletedBookCategory);
+        console.log('book category deleted:', deletedBookCategory);
         
         handleResponse(res, 200, "Relation livre-catégorie supprimée avec succès", deletedBookCategory);
     } catch (error) {

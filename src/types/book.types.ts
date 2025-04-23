@@ -1,10 +1,12 @@
+// Définit la structure des données d'un livre
+// Utilise un tableau de catégories pour permettre plusieurs catégories par livre
 export interface BookProps {
-    id?: number;
-    title: string;
-    description: string;
-    cover: string;
-    user_id: number;
-    status: string;
-    category_id: number;
-    bookType_id: number;
+    id?: number;                    // Identifiant unique du livre (optionnel pour la création)
+    title: string;                  // Titre du livre
+    description: string;            // Description détaillée du livre
+    cover: string;                  // URL de l'image de couverture
+    user_id: number;                // ID de l'utilisateur qui a créé le livre
+    status: string;                 // État du livre (draft, published, etc.)
+    categories?: number[];          // Tableau des IDs des catégories du livre
+    booktype_id: number;            // Type de livre (roman, BD, manga, etc.)
 } 
