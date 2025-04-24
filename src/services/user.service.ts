@@ -8,7 +8,6 @@ export interface UserProps {
     name: string;
     lastName: string;
     role?: string;
-    createdAt?: Date;
 }
 
 export const getAllUsers = async () => {
@@ -44,7 +43,7 @@ export const postUser = async (user: UserProps) => {
         // SQL query to insert a new user into the "User" table
         const query = `
             INSERT INTO \"User\"
-            (username, password, email, "createdAt", role, name, "lastName") 
+            (username, password, email, "createdat", role, name, "lastname") 
             VALUES 
             ($1, $2, $3, NOW(), 'free', $4, $5)
             RETURNING *;

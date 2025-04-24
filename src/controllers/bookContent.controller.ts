@@ -42,7 +42,7 @@ export const createBookContentController = async (req: Request, res: Response): 
         const imageFile = req.file;
 
         if (!chapter_id || !order) {
-            res.status(400).json({ message: 'Chapter ID and order are required' });
+            res.status(400).json({ message: 'chapter ID and order are required' });
             return;
         }
 

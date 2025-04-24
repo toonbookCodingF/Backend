@@ -1,39 +1,49 @@
 import { Request, Response } from 'express';
 import { getAllChapters, getChapter, getChaptersByBook, createChapter, updateChapter, deleteChapter } from '../services/chapter.service';
 
+// Récupère tous les chapitres de la base de données
+// Utilisé principalement pour la modération et l'administration
 export const getChaptersController = async (req: Request, res: Response): Promise<void> => {
     try {
         const chapters = await getAllChapters();
         res.json(chapters);
     } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' });
+        res.status(500).json({ message: 'Erreur lors de la récupération des chapitres' });
     }
 };
 
+// Récupère un chapitre spécifique par son ID
+// Utilisé pour afficher le contenu d'un chapitre particulier
 export const getChapterController = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = parseInt(req.params.id);
         const chapter = await getChapter(id);
+        
         if (!chapter) {
-            res.status(404).json({ message: 'Chapter not found' });
+            res.status(404).json({ message: 'Chapitre non trouvé' });
             return;
         }
+
         res.json(chapter);
     } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' });
+        res.status(500).json({ message: 'Erreur lors de la récupération du chapitre' });
     }
 };
 
+// Récupère tous les chapitres d'un livre spécifique
+// Permet d'afficher la table des matières d'un livre
 export const getChaptersByBookController = async (req: Request, res: Response): Promise<void> => {
     try {
         const bookId = parseInt(req.params.bookId);
         const chapters = await getChaptersByBook(bookId);
         res.json(chapters);
     } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' });
+        res.status(500).json({ message: 'Erreur lors de la récupération des chapitres' });
     }
 };
 
+// Crée un nouveau chapitre pour un livre
+// Permet aux auteurs d'ajouter du contenu à leur livre
 export const createChapterController = async (req: Request, res: Response): Promise<void> => {
     try {
         const { book_id, title, status, order } = req.body;
@@ -77,7 +87,7 @@ export const createChapterController = async (req: Request, res: Response): Prom
             order
         });
 
-        res.status(201).json({ message: 'Chapter created successfully', data: newChapter });
+        res.status(201).json({ message: 'chapter created successfully', data: newChapter });
     } catch (error) {
         console.error('Error in createChapterController:', error);
         if (error instanceof Error) {
@@ -88,6 +98,8 @@ export const createChapterController = async (req: Request, res: Response): Prom
     }
 };
 
+// Met à jour un chapitre existant
+// Permet aux auteurs de modifier le contenu de leurs chapitres
 export const updateChapterController = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = parseInt(req.params.id);
@@ -99,7 +111,7 @@ export const updateChapterController = async (req: Request, res: Response): Prom
             order
         });
 
-        res.json({ message: 'Chapter updated successfully', data: updatedChapter });
+        res.json({ message: 'chapter updated successfully', data: updatedChapter });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });
@@ -109,11 +121,13 @@ export const updateChapterController = async (req: Request, res: Response): Prom
     }
 };
 
+// Supprime un chapitre
+// Permet aux auteurs de retirer des chapitres de leur livre
 export const deleteChapterController = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = parseInt(req.params.id);
         await deleteChapter(id);
-        res.json({ message: 'Chapter deleted successfully' });
+        res.json({ message: 'chapter deleted successfully' });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });
