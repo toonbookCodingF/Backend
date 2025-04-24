@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express, Router } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -12,6 +12,7 @@ import bookTypeRoutes from './routes/bookType.routes';
 import commentRoutes from './routes/comment.routes';
 import path from 'path';
 import { authenticateToken } from './middlewares/authMiddleware';
+import { loginController, createUserController, getUsersController, logoutController } from './controllers';
 
 // Configuration de l'environnement
 // Charge les variables d'environnement depuis le fichier .env
@@ -56,12 +57,23 @@ app.use('/api/books', bookRoutes); // Gestion des livres
 app.use('/api/categories', categoryRoutes); // Gestion des catégories
 app.use('/api/booktypes', bookTypeRoutes); // Gestion des types de livres
 
+// Routes utilisateur publiques
+const publicUserRouter = Router();
+publicUserRouter.post('/login', loginController);
+publicUserRouter.post('/postUser', createUserController);
+app.use('/api/users', publicUserRouter);
+
 // Routes protégées
 // Nécessitent une authentification valide
 app.use('/api/comments', authenticateToken, commentRoutes); // Gestion des commentaires
 app.use('/api/chapters', authenticateToken, chapterRoutes); // Gestion des chapitres
 app.use('/api/bookcontents', authenticateToken, bookContentRoutes); // Gestion du contenu des livres
-app.use('/api/users', authenticateToken, userRoutes); // Gestion des utilisateurs
+
+// Routes utilisateur protégées
+const protectedUserRouter = Router();
+protectedUserRouter.get('/getAll', getUsersController);
+protectedUserRouter.get('/logout', logoutController);
+app.use('/api/users', authenticateToken, protectedUserRouter);
 
 // Routes de relations
 // Gestion des relations entre livres et catégories

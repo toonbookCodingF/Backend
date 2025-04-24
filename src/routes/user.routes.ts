@@ -4,11 +4,12 @@ import { authenticateToken } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.get("/getAll", authenticateToken, getUsersController); // Public
-router.post("/postUser", createUserController); // Public
-router.post("/login", loginController); // Public
+// Routes publiques
+router.post("/login", loginController);
+router.post("/postUser", createUserController);
 
 // Routes protégées
+router.get("/getAll", authenticateToken, getUsersController);
 router.get("/logout", authenticateToken, logoutController);
 
 export default router;
