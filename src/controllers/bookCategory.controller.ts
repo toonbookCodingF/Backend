@@ -83,7 +83,7 @@ export const getCategoriesByBookController = async (req: Request, res: Response)
     }
 };
 
-export const getBooksByCategoryController = async (req: Request, res: Response): Promise<void> => {
+export const getBooksByCategoryIdController = async (req: Request, res: Response): Promise<void> => {
     try {
         const { categoryId } = req.params;
         console.log('Getting books for category:', categoryId);
@@ -97,7 +97,7 @@ export const getBooksByCategoryController = async (req: Request, res: Response):
         
         handleResponse(res, 200, "Livres de la catégorie récupérés avec succès", books);
     } catch (error) {
-        console.error('Error in getBooksByCategoryController:', error);
+        console.error('Error in getBooksByCategoryIdController:', error);
         handleResponse(res, 500, "Une erreur est survenue");
     }
 };

@@ -6,7 +6,7 @@ import { getAllChapters, getChapter, getChaptersByBook, createChapter, updateCha
 export const getChaptersController = async (req: Request, res: Response): Promise<void> => {
     try {
         const chapters = await getAllChapters();
-        res.json(chapters);
+        res.status(200).json(chapters);
     } catch (error) {
         res.status(500).json({ message: 'Erreur lors de la récupération des chapitres' });
     }
@@ -24,7 +24,7 @@ export const getChapterController = async (req: Request, res: Response): Promise
             return;
         }
 
-        res.json(chapter);
+        res.status(200).json(chapter);
     } catch (error) {
         res.status(500).json({ message: 'Erreur lors de la récupération du chapitre' });
     }
@@ -111,7 +111,7 @@ export const updateChapterController = async (req: Request, res: Response): Prom
             order
         });
 
-        res.json({ message: 'chapter updated successfully', data: updatedChapter });
+        res.status(200).json({ message: 'chapter updated successfully', data: updatedChapter });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });
@@ -122,12 +122,12 @@ export const updateChapterController = async (req: Request, res: Response): Prom
 };
 
 // Supprime un chapitre
-// Permet aux auteurs de retirer des chapitres de leur livre
+// Permet aux auteurs de supprimer leurs chapitres
 export const deleteChapterController = async (req: Request, res: Response): Promise<void> => {
     try {
         const id = parseInt(req.params.id);
         await deleteChapter(id);
-        res.json({ message: 'chapter deleted successfully' });
+        res.status(200).json({ message: 'chapter deleted successfully' });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ message: error.message });
