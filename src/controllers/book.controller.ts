@@ -6,7 +6,7 @@ import { getAllBooks, getBook, createBook, deleteBook, updateBook } from '../ser
 export const getBooksController = async (req: Request, res: Response): Promise<void> => {
   try {
     const books = await getAllBooks();
-    res.json(books);
+    res.status(200).json(books);
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }
@@ -22,7 +22,7 @@ export const getBookController = async (req: Request, res: Response): Promise<vo
       res.status(404).json({ message: 'book not found' });
       return;
     }
-    res.json(book);
+    res.status(200).json(book);
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }
@@ -67,7 +67,7 @@ export const deleteBookController = async (req: Request, res: Response): Promise
   try {
     const id = parseInt(req.params.id);
     await deleteBook(id);
-    res.json({ message: 'book deleted successfully' });
+    res.status(200).json({ message: 'book deleted successfully' });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ message: error.message });
@@ -93,7 +93,7 @@ export const updateBookController = async (req: Request, res: Response): Promise
       booktype_id
     }, coverFile);
 
-    res.json({ message: 'book updated successfully', data: updatedBook });
+    res.status(200).json({ message: 'book updated successfully', data: updatedBook });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ message: error.message });

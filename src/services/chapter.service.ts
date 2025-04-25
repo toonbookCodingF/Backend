@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Interface définissant la structure d'un chapitre
-interface ChapterProps {
+export interface ChapterProps {
     id?: number;
     book_id: number;
     title: string;

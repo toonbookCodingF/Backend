@@ -9,4 +9,5 @@ export interface BookProps {
     status: string;                 // État du livre (draft, published, etc.)
     categories?: number[];          // Tableau des IDs des catégories du livre
     booktype_id: number;            // Type de livre (roman, BD, manga, etc.)
+    createdat?: Date;               // Date de création du livre
 } 

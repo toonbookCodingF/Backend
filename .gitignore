@@ -1,8 +1,14 @@
-# dotenv environment variable files
-.env
-
 # npm
 node_modules
 dist
 *.gz
 
+coverage
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env

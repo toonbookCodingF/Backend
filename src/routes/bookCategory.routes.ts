@@ -3,7 +3,7 @@ import {
     getAllBookCategoriesController, 
     getBookCategoryController,
     getCategoriesByBookController,
-    getBooksByCategoryController,
+    getBooksByCategoryIdController,
     createBookCategoryController,
     updateBookCategoryController,
     deleteBookCategoryController
@@ -13,7 +13,7 @@ const router = Router();
 
 // Routes spécifiques d'abord
 router.get("/book/:bookId", getCategoriesByBookController);
-router.get("/category/:categoryId", getBooksByCategoryController);
+router.get("/category/:categoryId", getBooksByCategoryIdController);
 router.get("/:bookId/:categoryId", getBookCategoryController);
 // Route générique en dernier
 router.get("/", getAllBookCategoriesController);
