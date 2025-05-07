@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { createBookController, getBooksController, getBookController, updateBookController, deleteBookController } from '../../controllers';
 import { BookProps } from '../../types/book.types';
 
-// Mock de la base de données
+// On teste le contrôleur de livres car c'est une fonctionnalité centrale de l'application
+// Les livres sont la ressource principale et doivent être gérés correctement
 jest.mock('../../config/database', () => ({
     __esModule: true,
     default: {
@@ -17,20 +18,21 @@ describe('Book Controller', () => {
     let mockBook: BookProps;
 
     beforeEach(() => {
-        // Mock du livre
+        // On crée un mock de livre pour simuler les données
+        // C'est important d'avoir des données cohérentes pour tous les tests
         mockBook = {
             id: 1,
             title: 'Test Book',
             description: 'Test Description',
             cover: '/images/covers/test.jpg',
             status: 'published',
-            createdat: new Date(),
             user_id: 1,
             booktype_id: 1,
             categories: [1, 2]
         };
 
-        // Mock de la requête
+        // On configure la requête mockée avec les paramètres nécessaires
+        // Cela permet de tester le comportement du contrôleur avec différentes entrées
         mockRequest = {
             params: { id: '1' },
             body: {
@@ -42,7 +44,8 @@ describe('Book Controller', () => {
             }
         };
 
-        // Mock de la réponse
+        // On configure la réponse mockée pour vérifier les réponses HTTP
+        // C'est crucial pour s'assurer que le contrôleur renvoie les bonnes réponses
         mockResponse = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn()
@@ -51,6 +54,8 @@ describe('Book Controller', () => {
         nextFunction = jest.fn();
     });
 
+    // On teste la création d'un livre car c'est une opération fondamentale
+    // Il faut s'assurer que les livres sont créés correctement avec toutes leurs relations
     test('should create book', async () => {
         const { default: client } = require('../../config/database');
         client.query.mockImplementation((query: string, params?: any[]) => {
@@ -78,6 +83,8 @@ describe('Book Controller', () => {
         });
     });
 
+    // On teste la récupération de tous les livres car c'est une fonctionnalité essentielle
+    // Les utilisateurs doivent pouvoir voir tous les livres disponibles
     test('should get all books', async () => {
         const { default: client } = require('../../config/database');
         client.query.mockResolvedValueOnce({ rows: [mockBook] });
@@ -88,6 +95,8 @@ describe('Book Controller', () => {
         expect(mockResponse.json).toHaveBeenCalledWith([mockBook]);
     });
 
+    // On teste la récupération d'un livre spécifique car c'est important pour le détail
+    // Les utilisateurs doivent pouvoir accéder aux détails d'un livre particulier
     test('should get book by id', async () => {
         const { default: client } = require('../../config/database');
         client.query.mockResolvedValueOnce({ rows: [mockBook] });
@@ -98,6 +107,8 @@ describe('Book Controller', () => {
         expect(mockResponse.json).toHaveBeenCalledWith(mockBook);
     });
 
+    // On teste la mise à jour d'un livre car c'est important pour la maintenance
+    // Les auteurs doivent pouvoir modifier leurs livres
     test('should update book', async () => {
         const { default: client } = require('../../config/database');
         client.query.mockImplementation((query: string, params?: any[]) => {
@@ -130,6 +141,8 @@ describe('Book Controller', () => {
         });
     });
 
+    // On teste la suppression d'un livre car c'est une opération sensible
+    // Il faut s'assurer que la suppression est propre et supprime toutes les relations
     test('should delete book', async () => {
         const { default: client } = require('../../config/database');
         client.query.mockImplementation((query: string, params?: any[]) => {
