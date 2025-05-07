@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getAllBooks, getBook, createBook, deleteBook, updateBook } from '../services/book.service';
+import { getAllBooks, getBook, createBook, deleteBook, updateBook, searchBooks } from '../services/book.service';
 
 // Récupère tous les livres pour afficher la liste complète des œuvres disponibles
 // Permet aux utilisateurs de découvrir de nouveaux contenus
@@ -101,4 +101,45 @@ export const updateBookController = async (req: Request, res: Response): Promise
       res.status(400).json({ message: 'Unknown error' });
     }
   }
+};
+
+// On crée un contrôleur de recherche de livres car c'est nécessaire pour l'API
+// Ce contrôleur gère les requêtes de recherche et renvoie les résultats triés
+export const searchBooksController = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // On récupère le terme de recherche depuis le body car c'est plus approprié pour une recherche complexe
+        // Cela permet d'ajouter facilement d'autres paramètres de recherche si nécessaire
+        const { searchTerm, limit = 10, page = 1 } = req.body;
+
+        // On vérifie la présence du terme de recherche car il est obligatoire
+        // Cette validation assure que la recherche a un sens
+        if (!searchTerm) {
+            res.status(400).json({ message: 'Le terme de recherche est requis' });
+            return;
+        }
+
+        // On effectue la recherche car c'est nécessaire pour trouver les livres
+        // Les résultats sont déjà triés par pertinence dans le service
+        const books = await searchBooks(searchTerm, limit, page);
+
+        // On renvoie les résultats car ils sont nécessaires pour le frontend
+        // Le code 200 indique que la recherche a réussi
+        res.status(200).json({
+            message: 'Recherche effectuée avec succès',
+            data: books,
+            pagination: {
+                page,
+                limit,
+                total: books.length
+            }
+        });
+    } catch (error) {
+        // On gère les erreurs car elles peuvent survenir lors de la recherche
+        // Cette gestion permet de fournir des messages d'erreur clairs au frontend
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: 'Erreur lors de la recherche de livres' });
+        }
+    }
 }; 
