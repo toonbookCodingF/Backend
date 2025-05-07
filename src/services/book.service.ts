@@ -215,4 +215,61 @@ export const deleteBook = async (id: number) => {
         console.error('Error in deleteBook:', error);
         throw error;
     }
+};
+
+// On crée une fonction de recherche de livres car c'est nécessaire pour la barre de recherche
+// Cette fonction utilise les fonctionnalités natives de PostgreSQL pour la recherche
+export const searchBooks = async (searchTerm: string, limit: number = 10, page: number = 1) => {
+    try {
+        // On calcule l'offset pour la pagination car c'est nécessaire pour récupérer les bons résultats
+        // Cette formule permet de sauter les résultats des pages précédentes
+        const offset = (page - 1) * limit;
+
+        // On utilise une recherche avec ILIKE pour une recherche insensible à la casse
+        // Cette approche utilise uniquement les fonctionnalités natives de PostgreSQL
+        const query = `
+            WITH ranked_results AS (
+                SELECT 
+                    b.*,
+                    CASE 
+                        WHEN LOWER(b.title) = LOWER($1) THEN 3  -- Correspondance exacte
+                        WHEN LOWER(b.title) LIKE LOWER($2) THEN 2  -- Commence par
+                        WHEN LOWER(b.title) LIKE LOWER($3) THEN 1  -- Contient
+                        ELSE 0
+                    END as relevance
+                FROM "book" b
+                WHERE 
+                    LOWER(b.title) LIKE LOWER($2)  -- Commence par
+                    OR LOWER(b.title) LIKE LOWER($3)  -- Contient
+            )
+            SELECT * FROM ranked_results
+            WHERE relevance > 0
+            ORDER BY 
+                relevance DESC,  -- On trie d'abord par pertinence
+                title ASC  -- Puis par ordre alphabétique
+            LIMIT $4
+            OFFSET $5;
+        `;
+
+        // On prépare les paramètres de recherche
+        // On utilise différents patterns pour différents niveaux de correspondance
+        const values = [
+            searchTerm,                    // Terme exact pour la comparaison
+            `${searchTerm}%`,             // Commence par
+            `%${searchTerm}%`,            // Contient
+            limit,
+            offset
+        ];
+
+        const result = await client.query(query, values);
+        return result.rows;
+    } catch (error) {
+        // On gère les erreurs car elles peuvent survenir lors de la recherche
+        // Cette gestion permet de remonter des messages d'erreur clairs
+        if (error instanceof Error) {
+            throw new Error(error.message || "Erreur lors de la recherche de livres");
+        } else {
+            throw new Error("Erreur lors de la recherche de livres");
+        }
+    }
 }; 
