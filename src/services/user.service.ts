@@ -27,6 +27,17 @@ export const getUser = async (email: string) => {
         throw new Error("Database error");
     }
 }
+export const getUserById = async (id: number) => {
+    const query = `SELECT * FROM \"User\" WHERE id = $1;`;
+    const values = [id];
+    try {
+        const result = await client.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        console.error("Error getting user:", error);
+        throw new Error("Database error");
+    }
+}
 
 export const postUser = async (user: UserProps) => {
     // Query to check if the email already exists

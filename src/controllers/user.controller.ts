@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getAllUsers, getUser, postUser } from "../services/user.service";
+import { getAllUsers, getUser, getUserById, postUser } from "../services/user.service";
 import * as EmailValidator from 'email-validator';
 import * as argon2 from "argon2";
 import jwt from 'jsonwebtoken';
@@ -23,6 +23,20 @@ export const getUserController = async (req: Request, res: Response, next: NextF
     try {
         const email = req.params.email;
         const user = await getUser(email);
+        if (!user) {
+            handleResponse(res, 404, "User not found");
+            return;
+        }
+        handleResponse(res, 200, "User retrieved successfully", user);
+    } catch (error) {
+        handleResponse(res, 500, "Something went wrong");
+    }
+};
+
+export const getUserByIdController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const id = parseInt(req.params.id);
+        const user = await getUserById(id);
         if (!user) {
             handleResponse(res, 404, "User not found");
             return;

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUsersController, loginController, logoutController, createUserController } from "../controllers";
+import { getUsersController, loginController, logoutController, createUserController, getUserByIdController } from "../controllers";
 import { authenticateToken } from "../middlewares/authMiddleware";
 
 const router = Router();
@@ -10,6 +10,7 @@ router.post("/postUser", createUserController);
 
 // Routes protégées
 router.get("/getAll", authenticateToken, getUsersController);
+router.get("/getById/:id", authenticateToken, getUserByIdController);
 router.get("/logout", authenticateToken, logoutController);
 
 export default router;
