@@ -13,7 +13,7 @@ import bookTypeRoutes from './routes/bookType.routes';
 import commentRoutes from './routes/comment.routes';
 import path from 'path';
 import { authenticateToken } from './middlewares/authMiddleware';
-import { loginController, createUserController, getUsersController, logoutController } from './controllers';
+import { loginController, createUserController, getUsersController, logoutController, getUserByIdController } from './controllers';
 
 // Configuration de l'environnement
 // Charge les variables d'environnement depuis le fichier .env
@@ -69,12 +69,14 @@ export function createApp(): Express {
     app.use('/api/comments', authenticateToken, commentRoutes); // Gestion des commentaires
     app.use('/api/chapters', authenticateToken, chapterRoutes); // Gestion des chapitres
     app.use('/api/bookcontents', authenticateToken, bookContentRoutes); // Gestion du contenu des livres
-    
+
     // Routes utilisateur protégées
     const protectedUserRouter = express.Router();
     protectedUserRouter.get('/getAll', getUsersController);
     protectedUserRouter.get('/logout', logoutController);
     app.use('/api/users', authenticateToken, protectedUserRouter);
+    app.use('/api/users/getById/:id', authenticateToken, getUserByIdController);
+
 
     // Routes de relations
     // Gestion des relations entre livres et catégories
