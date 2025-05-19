@@ -1,13 +1,15 @@
 import client from "../config/database";
 
-export interface UserProps{
-    username: string,
-    password: string,
-    email: string,
-    name:string,
-    lastName: string
-
+export interface UserProps {
+    id?: number;
+    username: string;
+    password: string;
+    email: string;
+    name: string;
+    lastName: string;
+    role?: string;
 }
+
 export const getAllUsers = async () => {
     const result = await client.query("SELECT * FROM \"User\"");
     return result.rows;
@@ -20,6 +22,17 @@ export const getUser = async (email: string) => {
     try {
         const result = await client.query(query, values);
         return result.rows[0]; // ✅ Retourne l'objet utilisateur
+    } catch (error) {
+        console.error("Error getting user:", error);
+        throw new Error("Database error");
+    }
+}
+export const getUserById = async (id: number) => {
+    const query = `SELECT * FROM \"User\" WHERE id = $1;`;
+    const values = [id];
+    try {
+        const result = await client.query(query, values);
+        return result.rows[0];
     } catch (error) {
         console.error("Error getting user:", error);
         throw new Error("Database error");
@@ -41,7 +54,7 @@ export const postUser = async (user: UserProps) => {
         // SQL query to insert a new user into the "User" table
         const query = `
             INSERT INTO \"User\"
-            (username, password, email, "createdAt", role, name, "lastName") 
+            (username, password, email, "createdat", role, name, "lastname") 
             VALUES 
             ($1, $2, $3, NOW(), 'free', $4, $5)
             RETURNING *;

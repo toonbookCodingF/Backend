@@ -1,39 +1,51 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/auth";
+import { JWT_SECRET } from "../config/jwt.config";
 import { UserProps } from "../services/user.service"; // Importation de UserProps
 
-// Interface Authentifiée qui étend Request avec un utilisateur
-interface AuthenticatedRequest extends Request {
-    user?: UserProps; // L'utilisateur sera de type UserProps après vérification du token
-}
-
 // Middleware pour vérifier le token JWT
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    // Recherche du token dans les cookies ou dans l'en-tête Authorization
-    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
-
-    if (!token) {
-        // Si aucun token n'est trouvé, renvoyer une erreur 401 et ne pas retourner de valeur
-        res.status(401).json({ message: "Non autorisé : aucun token fourni" });
-        return; // Don't return the response, just terminate the middleware
-    }
-
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        // Décoder le token et récupérer l'utilisateur. Utilisation de `UserProps` comme type pour l'utilisateur décodé.
-        const decoded = jwt.verify(token, JWT_SECRET) as { exp: number } & UserProps;
+        // Vérifier d'abord le header Authorization
+        const authHeader = req.headers['authorization'];
+        
+        let token = authHeader && authHeader.split(' ')[1];
 
-        if (decoded.exp * 1000 < Date.now()) {
-            res.status(403).json({ message: "Token invalide ou expiré" });
+        // Si pas de token dans le header, vérifier le cookie
+        if (!token) {
+            token = req.cookies.token;
+        }
 
+        // Si toujours pas de token, vérifier le query parameter (pour les appels API directs)
+        if (!token && req.query.token) {
+            token = req.query.token as string;
+        }
+
+        if (!token) {
+            res.status(401).json({ 
+                message: 'Token manquant',
+                error: 'AUTH_NO_TOKEN'
+            });
             return;
         }
-        req.user = decoded;
 
-        // Passer à la suite de la route ou du middleware
-        next();
-    } catch (err) {
-        // Si le token est invalide ou expiré, renvoyer une erreur 403
-        res.status(403).json({ message: "Token invalide ou expiré" });
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+            req.user = { id: decoded.id } as UserProps;
+            next();
+        } catch (jwtError) {
+            console.error('Erreur de vérification du token:', jwtError);
+            res.status(401).json({ 
+                message: 'Token invalide ou expiré',
+                error: 'AUTH_INVALID_TOKEN'
+            });
+        }
+    } catch (error) {
+        console.error('=== Erreur d\'authentification ===');
+        console.error('Erreur complète:', error);
+        res.status(500).json({ 
+            message: 'Erreur serveur lors de l\'authentification',
+            error: 'AUTH_SERVER_ERROR'
+        });
     }
 };
