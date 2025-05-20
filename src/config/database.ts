@@ -6,13 +6,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Configuration de la connexion à la base de données PostgreSQL
-// Utilise les variables d'environnement pour les paramètres sensibles
 const client = new Client({
-    host: process.env.DB_HOST, // Adresse du serveur de base de données
-    port: Number(process.env.DB_PORT), // Port de connexion
-    user: process.env.DB_USER, // Nom d'utilisateur
-    password: process.env.DB_PASS, // Mot de passe
-    database: process.env.DB_NAME, // Nom de la base de données
+    connectionString: `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 // Établissement de la connexion à la base de données
