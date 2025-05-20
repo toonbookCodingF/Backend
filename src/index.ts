@@ -14,7 +14,7 @@ import commentRoutes from './routes/comment.routes';
 import path from 'path';
 import { authenticateToken } from './middlewares/authMiddleware';
 import { loginController, createUserController, getUsersController, logoutController, getUserByIdController } from './controllers';
-
+import myReadingRoutes from './routes/myreading.routes';
 // Configuration de l'environnement
 // Charge les variables d'environnement depuis le fichier .env
 // Permet une configuration sécurisée des paramètres sensibles
@@ -69,7 +69,7 @@ export function createApp(): Express {
     app.use('/api/comments', authenticateToken, commentRoutes); // Gestion des commentaires
     app.use('/api/chapters', authenticateToken, chapterRoutes); // Gestion des chapitres
     app.use('/api/bookcontents', authenticateToken, bookContentRoutes); // Gestion du contenu des livres
-
+    app.use('/api/myreadings', authenticateToken, myReadingRoutes); // Gestion des myreadings
     // Routes utilisateur protégées
     const protectedUserRouter = express.Router();
     protectedUserRouter.get('/getAll', getUsersController);
